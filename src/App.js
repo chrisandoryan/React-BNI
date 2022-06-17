@@ -3,6 +3,7 @@ import './App.css';
 import HomePage from './pages/HomePage';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './assets/css/general_style.css';
 
 function App() { // functional component
   const name = "FanPepsita";

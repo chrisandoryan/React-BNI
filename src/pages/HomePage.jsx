@@ -1,5 +1,10 @@
 import React from 'react';
-import { Col, Container, Nav, Navbar, NavDropdown, Row, Table } from 'react-bootstrap';
+import { Button, Col, Container, Nav, Navbar, NavDropdown, Row, Table } from 'react-bootstrap';
+import AgendaForm from '../components/AgendaForm';
+import AgendaFormFunction from '../components/AgendaFormFunction';
+import ToastMessage from '../components/ToastMessage';
+
+import styles from '../assets/css/main_style.module.css';
 
 class HomePage extends React.Component {
     constructor(props) {
@@ -28,23 +33,21 @@ class HomePage extends React.Component {
                 },
             ],
             pageTitle: "Agenda - Homepage",
+            showToast: false,
+            toastMessage: ""
         }
     }
 
     componentDidMount() {
         // setelah 5 detik, data agenda bertambah dan masuk ke state agendas
         setTimeout(() => {
-            // let oldAgendas = this.state.agendas; // gaboleh gini, karena copy reference
-            let oldAgendas = [...this.state.agendas]; // copy isi this.state.agendas ke variable baru
 
-            oldAgendas.push({
-                title: "Kerjain PR",
-                date: "20 Juni 2022",
-                description: "Biar ga dimarahin Bu Guru"
+            this.addAgenda({
+                title: "Kerjain Skripsi",
+                date: "21 Juni 2022",
+                description: "Biar lulus tepat waktu"
             });
-            this.setState({
-                agendas: oldAgendas
-            });
+
         }, 5000);
     }
 
@@ -54,10 +57,43 @@ class HomePage extends React.Component {
         console.log("Prev State", prevState);
     }
 
+    addAgenda = (dataAgenda) => {
+        // let currAgendas = this.state.agendas; // gaboleh gini, karena ini copy reference
+        let currAgendas = [...this.state.agendas]; // copy isi this.state.agendas ke variable baru
+
+        currAgendas.push(dataAgenda); // push data baru ke variable agenda yang udah dicopy
+        this.setState({
+            agendas: currAgendas
+        }); // set state agenda dengan nilai yang baru (yang udah ditambahin data baru)
+    }
+
+    deleteAgenda = (id) => {
+        let currAgendas = [...this.state.agendas];
+        currAgendas.splice(id, 1); // delete elemen dari array, mulai dari data ke-id sebanyak 1 data
+        this.setState({
+            agendas: currAgendas
+        });
+    }
+
+    showValidationResult = (valResult) => {
+        this.setState({
+            showToast: true,
+            toastMessage: valResult.message
+        });
+    }
+
+    hideToast = () => {
+        this.setState({
+            showToast: false,
+            toastMessage: ""
+        });
+    }
+
     // dimana kita menulis HTML agar dirender oleh browser
     render() {
         return (
             <div>
+                <ToastMessage hideToast={this.hideToast} show={this.state.showToast} message={this.state.toastMessage}></ToastMessage>
                 {/* Heading/Judul */}
                 <div>
                     <h1>{this.state.pageTitle}</h1>
@@ -88,37 +124,42 @@ class HomePage extends React.Component {
                 <div>
                     <Container>
                         <Row>
-                            {/* Untuk Today's Agenda */}
-                            <Col style={{ border: "1px solid black" }} xs={3} md={3} lg={3} >
-                                1
+                            {/* Untuk Add Agenda */}
+                            <Col style={{ border: "0px solid black" }} xs={3} md={3} lg={3} >
+                                <AgendaFormFunction callAddAgendaFunction={this.addAgenda}></AgendaFormFunction>
+                                {/* <AgendaForm showValidationResult={this.showValidationResult} callAddAgendaFunction={this.addAgenda}></AgendaForm> */}
                             </Col>
                             {/* Untuk Table Agenda */}
-                            <Col style={{ border: "1px solid black" }} xs={9} md={9} lg={9}>
-                                <h3>Your Agenda</h3>
-                                <Table striped bordered hover>
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Title</th>
-                                            <th>Date</th>
-                                            <th>Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            this.state.agendas.map((agenda, i) => {
-                                                return (
-                                                    <tr>
-                                                        <td>{i + 1}</td>
-                                                        <td>{agenda.title}</td>
-                                                        <td>{agenda.date}</td>
-                                                        <td>{agenda.description}</td>
-                                                    </tr>
-                                                )
-                                           }) 
-                                        }
-                                    </tbody>
-                                </Table>
+                            <Col style={{ border: "0px solid black" }} xs={9} md={9} lg={9}>
+                                <div className={styles.table_container}>
+                                    <h3>Your Agenda</h3>
+                                    <Table id={styles.agenda_table} striped bordered hover>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Title</th>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                this.state.agendas.map((agenda, i) => {
+                                                    return (
+                                                        <tr>
+                                                            <td>{i + 1}</td>
+                                                            <td>{agenda.title}</td>
+                                                            <td>{agenda.date}</td>
+                                                            <td>{agenda.description}</td>
+                                                            <td><Button variant="danger" onClick={() => { this.deleteAgenda(i) }}>Delete</Button></td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </div>
                             </Col>
                         </Row>
                     </Container>
